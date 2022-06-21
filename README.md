@@ -1,0 +1,4 @@
+### Environment Vars
+- TELEGRAM_BOT_KEY
+- OPENAI_API_KEY
+- WHITELIST_IDS
