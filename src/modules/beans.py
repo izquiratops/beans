@@ -3,8 +3,19 @@ import openai
 
 from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext, MessageHandler, filters
+from telegram.ext.filters import MessageFilter
 
-from whitelist import Whitelisted
+
+def parse_whitelist():
+    string_list = os.getenv("WHITELIST_IDS").split(",")
+    return [int(x) for x in string_list]
+
+
+class WhitelistFilter(MessageFilter):
+    whitelist_telegram_ids = parse_whitelist()
+
+    def filter(self, message):
+        return message.chat.id in self.whitelist_telegram_ids
 
 
 async def whoami_callback(update: Update, _: CallbackContext) -> None:
@@ -35,7 +46,7 @@ class Beans:
 
     def __init__(self, application) -> None:
         openai.api_key = os.getenv("OPENAI_API_KEY")
-        message_filter = Whitelisted() & ~filters.REPLY & ~filters.FORWARDED
+        message_filter = WhitelistFilter() & ~filters.REPLY & ~filters.FORWARDED
 
         # Handlers
         whoami = CommandHandler("whoami", whoami_callback)
