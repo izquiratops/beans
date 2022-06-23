@@ -1,6 +1,6 @@
-FROM python:3.9
+FROM python:3.9-slim
 WORKDIR /code
 COPY requirements.txt .
-COPY src/ src/
 RUN pip install -r requirements.txt
+COPY src/ src/
 CMD [ "python3", "src/main.py" ]
