@@ -3,7 +3,7 @@ import logging
 
 from telegram.ext import Application
 
-from src.modules.beans import Beans
+from modules.beans import Beans
 
 
 def main() -> None:

@@ -4,7 +4,7 @@ import openai
 from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext, filters
 
-from src.modules.whitelist import Whitelisted
+from modules.whitelist import Whitelisted
 
 
 async def run_callback(update: Update, _: CallbackContext) -> None:
