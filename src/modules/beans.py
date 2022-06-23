@@ -2,20 +2,9 @@ import os
 import openai
 
 from telegram import Update
-from telegram.ext import CommandHandler, CallbackContext, filters
+from telegram.ext import CommandHandler, CallbackContext, MessageHandler, filters
 
-from modules.whitelist import Whitelisted
-
-
-async def run_callback(update: Update, _: CallbackContext) -> None:
-    response = openai.Completion.create(
-        model="text-davinci-002",
-        prompt=update.message.text[5:],
-        temperature=0,
-        max_tokens=1024)
-
-    reply = response.choices[0].text
-    await update.message.reply_text(reply)
+from whitelist import Whitelisted
 
 
 async def whoami_callback(update: Update, _: CallbackContext) -> None:
@@ -25,16 +14,35 @@ async def whoami_callback(update: Update, _: CallbackContext) -> None:
 
 class Beans:
 
+    max_tokens = 1024
+    temperature = 5
+
+    async def message_callback(self, update: Update, _: CallbackContext) -> None:
+        response = openai.Completion.create(
+            model="text-davinci-002",
+            prompt=update.message.text,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens)
+
+        reply = response.choices[0].text
+        await update.message.reply_text(reply)
+
+    async def change_temp_callback(self, update: Update, _: CallbackContext) -> None:
+        value = update.message.text.replace('/temperature', '')
+        self.temperature = int(value)
+
+        await update.message.reply_text('Done')
+
     def __init__(self, application) -> None:
         openai.api_key = os.getenv("OPENAI_API_KEY")
-        message_filter = Whitelisted()
+        message_filter = Whitelisted() & ~filters.REPLY & ~filters.FORWARDED
 
         # Handlers
         whoami = CommandHandler("whoami", whoami_callback)
-        run = CommandHandler("run", run_callback, message_filter)
-        # TODO: message = MessageHandler(message_filters, message_callback)
+        change_temp = CommandHandler("temperature", self.change_temp_callback)
+        message = MessageHandler(message_filter, self.message_callback)
 
         # Dispatcher
         application.add_handler(whoami)
-        application.add_handler(run)
-        # TODO: application.add_handler(message)
+        application.add_handler(change_temp)
+        application.add_handler(message)
