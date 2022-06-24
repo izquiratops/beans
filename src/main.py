@@ -23,7 +23,7 @@ def main() -> None:
     # OpenAI Telegram Handlers
     Beans(application)
 
-    # 🥳
+    # Let's run it 🥳
     application.run_polling()
 
 
